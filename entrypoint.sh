@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd /app
-mix crowdin
+mix crowdin /github/workspace
