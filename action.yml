@@ -6,10 +6,10 @@ inputs:
   token:
     description: 'Crowdin token'
     required: true
-  project-id:
+  project_id:
     description: 'Crowdin project id'
     required: true
-  source-file:
+  source_file:
     description: 'Crowdin file to track'
     required: true
 
