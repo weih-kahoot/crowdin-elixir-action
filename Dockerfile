@@ -6,5 +6,6 @@ WORKDIR /app
 
 RUN mix local.hex --force
 RUN mix deps.get
+RUN mix compile
 
 ENTRYPOINT ["/app/entrypoint.sh"]

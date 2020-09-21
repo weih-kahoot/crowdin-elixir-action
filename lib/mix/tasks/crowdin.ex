@@ -7,6 +7,8 @@ defmodule Mix.Tasks.Crowdin do
     project_id = System.get_env("INPUT_PROJECT_ID")
     source_file = System.get_env("INPUT_SOURCE_FILE")
 
+    IO.puts "Env: #{token} #{project_id} #{source_file}"
+
     sync(workspace, token, project_id, source_file)
     |> IO.inspect
   end
