@@ -71,8 +71,8 @@ defmodule Mix.Tasks.Crowdin do
     File.cd!(workspace)
 
     localization_branch = "localization"
-    github_actor = System.get_env("GITHUB_ACTOR")
-    github_token = System.get_env("GITHUB_TOKEN")
+    github_actor = System.get_env("GITHUB_ACTOR") |> IO.inspect(label: :actor)
+    github_token = System.get_env("GITHUB_TOKEN") |> IO.inspect(label: :github_token)
     github_repository = System.get_env("GITHUB_REPOSITORY")
     repo_url="https://#{github_actor}:#{github_token}@github.com/#{github_repository}.git"
     System.cmd("git", ["config", "--global", "user.email", "crowdin-elixir-action@kahoot.com"])
@@ -85,7 +85,7 @@ defmodule Mix.Tasks.Crowdin do
 
         System.cmd("git", ["add", "."])
         System.cmd("git", ["commit", "-m", "Update localization"])
-        System.cmd("git", ["push", "--force", repo_url])
+        System.cmd("git", ["push", "--force", repo_url]) |> IO.inspect(label: :push)
       _ -> :ok
     end
   end
