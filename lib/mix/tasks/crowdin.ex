@@ -3,6 +3,8 @@ defmodule Mix.Tasks.Crowdin do
   alias CrowdinElixirAction.Crowdin
 
   def run(workspace) do
+    IO.puts "Mix crowdin task #{inspect workspace}"
+
     token = System.get_env("INPUT_TOKEN")
     project_id = System.get_env("INPUT_PROJECT_ID")
     source_file = System.get_env("INPUT_SOURCE_FILE")
