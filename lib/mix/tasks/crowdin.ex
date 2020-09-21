@@ -31,9 +31,46 @@ defmodule Mix.Tasks.Crowdin do
     end
   end
 
+  def download_translation(workspace, client, project_id, file) do
+    with {:ok, res} <- Crowdin.get_project(client, project_id),
+         200 <- res.status,
+         %{"data" => %{"targetLanguages" => target_languages}} <- res.body do
+      Enum.each(target_languages, fn target_language ->
+        download_translation_for_language(workspace, client, project_id, file, target_language)
+      end)
+    end
+  end
+
+  def download_translation_for_language(workspace, client, project_id, file, target_language) do
+    with {:ok, res} <- Crowdin.build_project_file_translation(client, project_id, file["id"], target_language["id"]),
+         200 <- res.status,
+         %{"data" => %{"url" => url}} <- res.body,
+         {:ok, res} <- Tesla.get(url) do
+      export_pattern = file["exportOptions"]["exportPattern"]
+      target_file_name = translate_file_name(export_pattern, target_language)
+      target_path = Path.join(workspace, target_file_name)
+      File.mkdir_p(Path.dirname(target_path))
+      File.write(target_path, res.body)
+    end
+  end
+
+  def translate_file_name(export_pattern, target_language) do
+    Enum.reduce(target_language, export_pattern, fn {key, value}, acc ->
+      if is_binary(value) do
+        key = key |> String.replace(~r/([A-Z])/, "_\\1") |> String.downcase()
+        acc = String.replace(acc, "%#{key}%", to_string(value))
+      else
+        acc
+      end
+    end)
+  end
+
+
   defp sync(workspace, token, project_id, source_file) do
     client = Crowdin.client(token)
-    upload_source(workspace, client, project_id, source_file)
-#    with {:ok, res} <- Crowdin.
+    with {:ok, res} <- upload_source(workspace, client, project_id, source_file),
+         file <- res.body["data"] do
+      download_translation(workspace, client, project_id, file)
+    end
   end
 end

@@ -45,4 +45,10 @@ defmodule CrowdinElixirAction.Crowdin do
       ])
     end
   end
+
+  def build_project_file_translation(client, project_id, file_id, target_language_id) do
+    post(client, "/projects/#{project_id}/translations/builds/files/#{file_id}", %{
+      targetLanguageId: target_language_id
+    })
+  end
 end
