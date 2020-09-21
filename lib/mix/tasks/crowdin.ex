@@ -60,7 +60,7 @@ defmodule Mix.Tasks.Crowdin do
     Enum.reduce(target_language, export_pattern, fn {key, value}, acc ->
       if is_binary(value) do
         key = key |> String.replace(~r/([A-Z])/, "_\\1") |> String.downcase()
-        acc = String.replace(acc, "%#{key}%", to_string(value))
+        String.replace(acc, "%#{key}%", to_string(value))
       else
         acc
       end
