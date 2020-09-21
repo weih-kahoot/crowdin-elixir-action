@@ -3,8 +3,8 @@ name: 'crowdin-elixir-action'
 description: 'Tries to manage and synchronize Crowdin'
 
 inputs:
-  token:
-    description: 'Crowdin token'
+  source_file:
+    description: 'Crowdin source file'
     required: true
 
 runs:
