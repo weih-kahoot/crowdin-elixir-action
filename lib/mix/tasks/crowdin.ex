@@ -2,7 +2,7 @@ defmodule Mix.Tasks.Crowdin do
   use Mix.Task
   alias CrowdinElixirAction.Crowdin
 
-  def run(workspace) do
+  def run([workspace]) do
     IO.puts "Mix crowdin task #{inspect workspace}"
 
     token = System.get_env("INPUT_TOKEN")
@@ -84,12 +84,13 @@ defmodule Mix.Tasks.Crowdin do
 
     case System.cmd("git", ["status", "--porcelain", "--untracked-files=no"]) do
       {"", 0} ->
+        :ok
+      _ ->
         IO.puts "Push to branch #{localization_branch}"
 
         System.cmd("git", ["add", "."])
         System.cmd("git", ["commit", "-m", "Update localization"])
         System.cmd("git", ["push", "--force", repo_url]) |> IO.inspect(label: :push)
-      _ -> :ok
     end
   end
 
