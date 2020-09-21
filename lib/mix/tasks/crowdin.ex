@@ -4,8 +4,8 @@ defmodule Mix.Tasks.Crowdin do
 
   def run(workspace) do
     token = System.get_env("INPUT_TOKEN")
-    project_id = System.get_env("INPUT_PROJECT_ID")
-    source_file = System.get_env("INPUT_SOURCE_FILE")
+    project_id = System.get_env("INPUT_PROJECT-ID")
+    source_file = System.get_env("INPUT_SOURCE-FILE")
 
     IO.puts "Env: #{token} #{project_id} #{source_file}"
 
