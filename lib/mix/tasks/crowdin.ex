@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Crowdin do
     project_id = System.get_env("INPUT_PROJECT_ID")
     source_file = System.get_env("INPUT_SOURCE_FILE")
 
-    sync(workspace, token, project_id, source_file) |> IO.inspect(label: result)
+    sync(workspace, token, project_id, source_file) |> IO.inspect(label: :result)
   end
 
   def find_matching_remote_file(client, project_id, source_name) do
