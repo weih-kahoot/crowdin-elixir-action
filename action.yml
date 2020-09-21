@@ -6,12 +6,6 @@ inputs:
   token:
     description: 'Crowdin token'
     required: true
-  project_id:
-    description: 'Crowdin project id'
-    required: true
-  source_file:
-    description: 'Crowdin file to track'
-    required: true
 
 runs:
   using: docker
