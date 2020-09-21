@@ -1,0 +1,21 @@
+name: 'crowdin-elixir-action'
+
+description: 'Tries to manage and synchronize Crowdin'
+
+inputs:
+  crowdin-token:
+    description: 'Crowdin token'
+    required: true
+  crowdin-project-id:
+    description: 'Crowdin project id'
+    required: true
+  crowdin-file-id:
+    description: 'Crowdin file id'
+    required: true
+  crowdin-file:
+    description: 'Crowdin file to track'
+    required: true
+
+runs:
+  using: docker
+  image: 'Dockerfile'
