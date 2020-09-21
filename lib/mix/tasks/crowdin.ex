@@ -65,12 +65,35 @@ defmodule Mix.Tasks.Crowdin do
     end)
   end
 
+  def create_pr_if_changed(workspace) do
+    File.cd!(workspace)
+
+    localization_branch = "localization"
+    github_actor = System.get_env("GITHUB_ACTOR")
+    github_token = System.get_env("GITHUB_TOKEN")
+    github_repository = System.get_env("GITHUB_REPOSITORY")
+    repo_url="https://#{github_actor}:#{github_token}@github.com/#{github_repository}.git"
+    System.cmd("git", ["config", "--global", "user.email", "crowdin-elixir-action@kahoot.com"])
+    System.cmd("git", ["config", "--global", "user.name", "Crowdin Elixir Action"])
+    System.cmd("git", ["checkout", "-b", localization_branch])
+
+    case System.cmd("git", ["status", "--porcelain", "--untracked-files=no"]) do
+      {"", 0} ->
+        IO.puts "Push to branch #{localization_branch}"
+
+        System.cmd("git", ["add", "."])
+        System.cmd("git", ["commit", "-m", "Update localization"])
+        System.cmd("git", ["push", "--force", repo_url])
+      _ -> :ok
+    end
+  end
 
   defp sync(workspace, token, project_id, source_file) do
     client = Crowdin.client(token)
     with {:ok, res} <- upload_source(workspace, client, project_id, source_file),
          file <- res.body["data"] do
       download_translation(workspace, client, project_id, file)
+      create_pr_if_changed(workspace)
     end
   end
 end
