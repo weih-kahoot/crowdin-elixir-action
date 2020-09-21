@@ -9,11 +9,7 @@ defmodule Mix.Tasks.Crowdin do
     project_id = System.get_env("INPUT_PROJECT_ID")
     source_file = System.get_env("INPUT_SOURCE_FILE")
 
-    if !(workspace && token && project_id && source_file) do
-      IO.puts "Missing config!"
-    else
-      sync(workspace, token, project_id, source_file)
-    end
+    sync(workspace, token, project_id, source_file) |> IO.inspect(label: result)
   end
 
   def find_matching_remote_file(client, project_id, source_name) do
@@ -24,6 +20,7 @@ defmodule Mix.Tasks.Crowdin do
   end
 
   def upload_source(workspace, client, project_id, source_file) do
+    IO.puts "Upload source"
     path = Path.join(workspace, source_file)
     source_name = Path.basename(source_file)
     with {:ok, res} <- Crowdin.add_storage(client, path),
@@ -37,6 +34,7 @@ defmodule Mix.Tasks.Crowdin do
   end
 
   def download_translation(workspace, client, project_id, file) do
+    IO.puts "Download translation"
     with {:ok, res} <- Crowdin.get_project(client, project_id),
          200 <- res.status,
          %{"data" => %{"targetLanguages" => target_languages}} <- res.body do
@@ -95,6 +93,7 @@ defmodule Mix.Tasks.Crowdin do
   end
 
   defp sync(workspace, token, project_id, source_file) do
+    IO.puts "Sync with crowdin"
     client = Crowdin.client(token)
     with {:ok, res} <- upload_source(workspace, client, project_id, source_file),
          file <- res.body["data"] do
