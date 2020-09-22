@@ -107,7 +107,7 @@ defmodule Mix.Tasks.Crowdin do
     with {:ok, res} <- Github.get_pulls(client, github_repository, base: base_branch),
       200 <- res.status, [] <- res.body do
       IO.puts "Create PR"
-      Github.create_pull_request(client, github_repository, %{title: "Update localization", base: base_branch, head: localization_branch})
+      Github.create_pull_request(client, github_repository, %{title: "Update localization", base: base_branch, head: localization_branch}) |> IO.inspect()
     else
       {:error, err} ->
         IO.puts "Got error #{err}"
