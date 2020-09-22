@@ -10,7 +10,8 @@ defmodule Mix.Tasks.Crowdin do
     project_id = System.get_env("INPUT_PROJECT_ID")
     source_file = System.get_env("INPUT_SOURCE_FILE")
 
-    sync(workspace, token, project_id, source_file) |> IO.inspect(label: :result)
+    update_source(workspace, token, project_id, source_file)
+    update_translation(workspace, token, project_id, source_file)
   end
 
   def find_matching_remote_file(client, project_id, source_name) do
@@ -70,6 +71,7 @@ defmodule Mix.Tasks.Crowdin do
   end
 
   def create_pr_if_changed(workspace) do
+    IO.puts "Create PR if changed"
     File.cd!(workspace)
 
     localization_branch = "localization"
@@ -108,13 +110,22 @@ defmodule Mix.Tasks.Crowdin do
     end
   end
 
-  defp sync(workspace, token, project_id, source_file) do
-    IO.puts "Sync with crowdin"
+  defp update_source(workspace, token, project_id, source_file) do
+    IO.puts "Sync source to crowdin"
     client = Crowdin.client(token)
-    with {:ok, res} <- upload_source(workspace, client, project_id, source_file),
-         file <- res.body["data"] do
-      download_translation(workspace, client, project_id, file)
-      create_pr_if_changed(workspace)
+    upload_source(workspace, client, project_id, source_file)
+  end
+
+  defp update_translation(workspace, token, project_id, source_file) do
+    IO.puts "Update translation from crowdin"
+    client = Crowdin.client(token)
+    source_name = Path.basename(source_file)    
+    case find_matching_remote_file(client, project_id, source_name) do
+      nil ->
+        IO.puts "Source doesn't exist on crowdin yet"
+      file ->
+        download_translation(workspace, client, project_id, file)
+	create_pr_if_changed(workspace)
     end
   end
 end
