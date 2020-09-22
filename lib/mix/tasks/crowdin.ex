@@ -29,9 +29,10 @@ defmodule Mix.Tasks.Crowdin do
   end
 
   def upload_source(workspace, client, project_id, source_file) do
-    IO.puts "Upload source"
     path = Path.join(workspace, source_file)
     source_name = Path.basename(source_file)
+    export_pattern = System.get_env("INPUT_EXPORT_PATTERN")
+    IO.puts "Upload source with #{source_name} export pattern: #{export_pattern}"
     with {:ok, res} <- Crowdin.add_storage(client, path),
          201 <- res.status,
          %{"data" => %{"id" => storage_id}} <- res.body do

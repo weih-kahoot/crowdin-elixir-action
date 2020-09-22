@@ -21,12 +21,12 @@ defmodule CrowdinElixirAction.Crowdin do
   end
 
   # TODO(weih): Support directories
-  def add_file(client, project_id, storage_id, name) do
+  def add_file(client, project_id, storage_id, name, export_pattern) do
     post(client, "/projects/#{project_id}/files", %{
       storageId: storage_id,
       name: name,
       exportOptions: %{
-        exportPattern: "/app/src/main/res/values-%two_letters_code%/%original_file_name%"
+        exportPattern: export_pattern
       }
     })
   end

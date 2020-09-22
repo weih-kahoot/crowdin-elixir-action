@@ -6,6 +6,9 @@ inputs:
   source_file:
     description: 'Crowdin source file'
     required: true
+  export_pattern:
+    description: 'Crowdin source export pattern'
+    required: true
   base_branch:
     description: 'Base branch for pull request'
     required: true
