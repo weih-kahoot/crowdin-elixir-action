@@ -9,9 +9,16 @@ defmodule Mix.Tasks.Crowdin do
     token = System.get_env("INPUT_TOKEN")
     project_id = System.get_env("INPUT_PROJECT_ID")
     source_file = System.get_env("INPUT_SOURCE_FILE")
+    update_source = System.get_env("INPUT_UPDATE_SOURCE")
+    update_translation = System.get_env("INPUT_UPDATE_TRANSLATION")
 
-    update_source(workspace, token, project_id, source_file)
-    update_translation(workspace, token, project_id, source_file)
+    IO.puts "Update source: #{update_source} update translation: #{update_translation}"
+    if update_source != nil do
+      update_source(workspace, token, project_id, source_file)
+    end
+    if update_translation != nil do
+      update_translation(workspace, token, project_id, source_file)
+    end
   end
 
   def find_matching_remote_file(client, project_id, source_name) do

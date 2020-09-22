@@ -10,7 +10,12 @@ inputs:
     description: 'Base branch for pull request'
     required: true
     default: 'master'
-
+  update_source:
+    description: 'Update source to crowdin'
+    required: false
+  update_translation:
+    description: 'Update translation from crowdin'
+    required: false
 runs:
   using: docker
   image: 'Dockerfile'
