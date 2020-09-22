@@ -59,8 +59,7 @@ defmodule Mix.Tasks.Crowdin do
   end
 
   def download_translation_for_language(workspace, client, project_id, file, target_language) do
-    IO.inspect(file, label: :file)
-    with {:ok, res} <- Crowdin.build_project_file_translation(client, project_id, file["id"], target_language["id"]) |> IO.inspect(),
+    with {:ok, res} <- Crowdin.build_project_file_translation(client, project_id, file["id"], target_language["id"]),
          200 <- res.status,
          %{"data" => %{"url" => url}} <- res.body,
          {:ok, res} <- Tesla.get(url) do
@@ -106,7 +105,7 @@ defmodule Mix.Tasks.Crowdin do
 
         System.cmd("git", ["add", "."])
         System.cmd("git", ["commit", "-m", "Update localization"])
-        System.cmd("git", ["push", "--force", repo_url]) |> IO.inspect(label: :push)
+        System.cmd("git", ["push", "--force", repo_url])
 
         base_branch = System.get_env("INPUT_BASE_BRANCH")
 
@@ -114,7 +113,7 @@ defmodule Mix.Tasks.Crowdin do
         with {:ok, res} <- Github.get_pulls(client, github_repository, base: base_branch),
              200 <- res.status, [] <- res.body do
           IO.puts "Create PR"
-          Github.create_pull_request(client, github_repository, %{title: "Update localization", base: base_branch, head: localization_branch}) |> IO.inspect()
+          Github.create_pull_request(client, github_repository, %{title: "Update localization", base: base_branch, head: localization_branch})
         else
           {:error, err} ->
             IO.puts "Got error #{err}"
