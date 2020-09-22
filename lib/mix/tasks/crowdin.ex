@@ -16,9 +16,9 @@ defmodule Mix.Tasks.Crowdin do
     if update_source == "true" do
       update_source(workspace, token, project_id, source_file)
     end
-    if update_translation == "true" do
+#    if update_translation == "true" do
       update_translation(workspace, token, project_id, source_file)
-    end
+#    end
   end
 
   def find_matching_remote_file(client, project_id, source_name) do
@@ -48,16 +48,23 @@ defmodule Mix.Tasks.Crowdin do
          200 <- res.status,
          %{"data" => %{"targetLanguages" => target_languages}} <- res.body do
       Enum.each(target_languages, fn target_language ->
-        download_translation_for_language(workspace, client, project_id, file, target_language)
+        case download_translation_for_language(workspace, client, project_id, file, target_language) do
+          :ok ->
+            IO.puts "Downloaded translation for #{inspect target_language} to #{inspect file}"
+          err ->
+            IO.puts "Failed to download translation for #{inspect target_language} to #{inspect file} err: #{inspect err}"
+        end
       end)
     end
   end
 
   def download_translation_for_language(workspace, client, project_id, file, target_language) do
-    with {:ok, res} <- Crowdin.build_project_file_translation(client, project_id, file["id"], target_language["id"]),
+    IO.inspect(file, label: :file)
+    with {:ok, res} <- Crowdin.build_project_file_translation(client, project_id, file["id"], target_language["id"]) |> IO.inspect(),
          200 <- res.status,
          %{"data" => %{"url" => url}} <- res.body,
          {:ok, res} <- Tesla.get(url) do
+      IO.puts "Download translation for language: #{inspect target_language} to #{inspect file}"
       export_pattern = file["exportOptions"]["exportPattern"]
       target_file_name = translate_file_name(export_pattern, target_language)
       target_path = Path.join(workspace, target_file_name)
@@ -82,8 +89,8 @@ defmodule Mix.Tasks.Crowdin do
     File.cd!(workspace)
 
     localization_branch = "localization"
-    github_actor = System.get_env("GITHUB_ACTOR") |> IO.inspect(label: :actor)
-    github_token = System.get_env("GITHUB_TOKEN") |> IO.inspect(label: :github_token)
+    github_actor = System.get_env("GITHUB_ACTOR")
+    github_token = System.get_env("GITHUB_TOKEN")
     github_repository = System.get_env("GITHUB_REPOSITORY")
     repo_url="https://#{github_actor}:#{github_token}@github.com/#{github_repository}.git"
     System.cmd("git", ["config", "--global", "user.email", "crowdin-elixir-action@kahoot.com"])
@@ -92,6 +99,7 @@ defmodule Mix.Tasks.Crowdin do
 
     case System.cmd("git", ["status", "--porcelain", "--untracked-files=no"]) do
       {"", 0} ->
+        IO.puts "No changes of translation"
         :ok
       _ ->
         IO.puts "Push to branch #{localization_branch}"
@@ -99,21 +107,21 @@ defmodule Mix.Tasks.Crowdin do
         System.cmd("git", ["add", "."])
         System.cmd("git", ["commit", "-m", "Update localization"])
         System.cmd("git", ["push", "--force", repo_url]) |> IO.inspect(label: :push)
-    end
 
-    base_branch = System.get_env("INPUT_BASE_BRANCH")
+        base_branch = System.get_env("INPUT_BASE_BRANCH")
 
-    client = Github.client(github_token)
-    with {:ok, res} <- Github.get_pulls(client, github_repository, base: base_branch),
-      200 <- res.status, [] <- res.body do
-      IO.puts "Create PR"
-      Github.create_pull_request(client, github_repository, %{title: "Update localization", base: base_branch, head: localization_branch}) |> IO.inspect()
-    else
-      {:error, err} ->
-        IO.puts "Got error #{err}"
-	{:error, err}
-      [_ | _] ->
-        IO.puts "PR already exists"
+        client = Github.client(github_token)
+        with {:ok, res} <- Github.get_pulls(client, github_repository, base: base_branch),
+             200 <- res.status, [] <- res.body do
+          IO.puts "Create PR"
+          Github.create_pull_request(client, github_repository, %{title: "Update localization", base: base_branch, head: localization_branch}) |> IO.inspect()
+        else
+          {:error, err} ->
+            IO.puts "Got error #{err}"
+            {:error, err}
+          [_ | _] ->
+            IO.puts "PR already exists"
+        end
     end
   end
 
@@ -131,8 +139,8 @@ defmodule Mix.Tasks.Crowdin do
       nil ->
         IO.puts "Source doesn't exist on crowdin yet"
       file ->
-        download_translation(workspace, client, project_id, file)
-	create_pr_if_changed(workspace)
+        download_translation(workspace, client, project_id, file["data"])
+        create_pr_if_changed(workspace)
     end
   end
 end
