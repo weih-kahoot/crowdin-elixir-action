@@ -13,10 +13,10 @@ defmodule Mix.Tasks.Crowdin do
     update_translation = System.get_env("INPUT_UPDATE_TRANSLATION")
 
     IO.puts "Update source: #{update_source} update translation: #{update_translation}"
-    if update_source != nil do
+    if update_source == "true" do
       update_source(workspace, token, project_id, source_file)
     end
-    if update_translation != nil do
+    if update_translation == "true" do
       update_translation(workspace, token, project_id, source_file)
     end
   end
