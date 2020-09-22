@@ -97,7 +97,7 @@ defmodule Mix.Tasks.Crowdin do
     System.cmd("git", ["config", "--global", "user.name", "Crowdin Elixir Action"])
     System.cmd("git", ["checkout", "-b", localization_branch])
 
-    case System.cmd("git", ["status", "--porcelain", "--untracked-files=no"]) do
+    case System.cmd("git", ["status", "--porcelain"]) do
       {"", 0} ->
         IO.puts "No changes of translation"
         :ok
