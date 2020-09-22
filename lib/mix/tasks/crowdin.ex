@@ -1,6 +1,7 @@
 defmodule Mix.Tasks.Crowdin do
   use Mix.Task
   alias CrowdinElixirAction.Crowdin
+  alias CrowdinElixirAction.Github
 
   def run([workspace]) do
     IO.puts "Mix crowdin task #{inspect workspace}"
@@ -93,13 +94,18 @@ defmodule Mix.Tasks.Crowdin do
 
     base_branch = System.get_env("INPUT_BASE_BRANCH")
 
-    Tesla.get("https://api.github.com/repos/#{github_repository}/pulls", queries: %{
-      base: base_branch
-    }, headers: [
-      {"authorization", "token #{github_token}"},
-      {"accept", "application/vnd.github.v3+json; application/vnd.github.antiope-preview+json; application/vnd.github.shadow-cat-preview+json"}
-    ]) |> IO.inspect()
-    
+    client = Github.client(github_token)
+    with {:ok, res} <- Github.get_pulls(client, github_repository, base: base_branch) |> IO.inspect(),
+      200 <- res.status, [] <- res.body do
+      IO.puts "Create PR"
+      Github.create_pull_request(client, github_repository, %{title: "Update localization", base: base_branch, head: localization_branch}) |> IO.inspect()
+    else
+      {:error, err} ->
+        IO.puts "Got error #{err}"
+	{:error, err}
+      [_ | _] ->
+        IO.puts "PR already exists"
+    end
   end
 
   defp sync(workspace, token, project_id, source_file) do
