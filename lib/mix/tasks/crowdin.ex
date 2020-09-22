@@ -90,6 +90,16 @@ defmodule Mix.Tasks.Crowdin do
         System.cmd("git", ["commit", "-m", "Update localization"])
         System.cmd("git", ["push", "--force", repo_url]) |> IO.inspect(label: :push)
     end
+
+    base_branch = System.get_env("INPUT_BASE_BRANCH")
+
+    Tesla.get("https://api.github.com/repos/#{github_repository}/pulls", queries: %{
+      base: base_branch
+    }, headers: [
+      {"authorization", "token #{github_token}"},
+      {"accept", "application/vnd.github.v3+json; application/vnd.github.antiope-preview+json; application/vnd.github.shadow-cat-preview+json"}
+    ]) |> IO.inspect()
+    
   end
 
   defp sync(workspace, token, project_id, source_file) do

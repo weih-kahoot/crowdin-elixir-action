@@ -6,6 +6,10 @@ inputs:
   source_file:
     description: 'Crowdin source file'
     required: true
+  base_branch:
+    description: 'Base branch for pull request'
+    required: true
+    default: 'master'
 
 runs:
   using: docker
